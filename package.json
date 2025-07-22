@@ -1,0 +1,62 @@
+{
+  "name": "ai-commit-helper",
+  "displayName": "AI Commit Helper",
+  "description": "Generate AI commit messages using OpenAI or Gemini",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+  "activationEvents": [
+    "onView:scm",
+    "onCommand:ai-commit-helper.generate"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "ai-commit-helper.generate",
+        "title": "AI Commit Helper - Generate Commit Message",
+        "icon": {
+          "light": "resources/light/icon.svg",
+          "dark": "resources/dark/icon.svg"
+        }
+      },
+      {
+        "command": "ai-commit-helper.update-google-api-key",
+        "title": "AI Commit Helper - Update Google API Key"
+      }
+    ],
+    "menus": {
+      "scm/title": [
+        {
+          "command": "ai-commit-helper.generate",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "type": "object",
+      "title": "AI Commit Helper",
+      "properties": {
+        "ai-commit-helper.googleApiKey": {
+          "type": "string",
+          "description": "Your Google Gemini API Key"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "watch": "tsc -watch -p ./",
+    "compile": "tsc -p ./",
+    "prepublishOnly": "npm run compile"
+  },
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "@types/vscode": "^1.70.0",
+    "tslint": "^6.1.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@google/genai": "^1.10.0"
+  }
+}

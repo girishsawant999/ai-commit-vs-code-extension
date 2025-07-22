@@ -1,0 +1,18 @@
+import * as vscode from "vscode";
+import { generateCommitMessage } from "./gitCommitMenu";
+import { updateGoogleApiKey } from "./llmProvider";
+
+export function activate(context: vscode.ExtensionContext) {
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "ai-commit-helper.generate",
+      generateCommitMessage
+    ),
+    vscode.commands.registerCommand(
+      "ai-commit-helper.update-google-api-key",
+      updateGoogleApiKey
+    )
+  );
+}
+
+export function deactivate() {}
