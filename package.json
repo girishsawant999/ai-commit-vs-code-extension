@@ -6,6 +6,11 @@
   "engines": {
     "vscode": "^1.70.0"
   },
+  "author": {
+    "name": "Girish Sawant",
+    "email": "girishsawant999.gs@gmail.com",
+    "url": "https://girishsawant.vercel.app"
+  },
   "activationEvents": [
     "onView:scm",
     "onCommand:ai-commit-helper.generate"
