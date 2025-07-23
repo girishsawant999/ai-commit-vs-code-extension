@@ -1,5 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import * as vscode from "vscode";
+import { outputChannel } from "./extension";
 
 let gemini: any;
 
@@ -67,7 +68,7 @@ export async function googleLLMProvider() {
         });
         return curr.text;
       } catch (err: any) {
-        console.log(err?.message);
+        outputChannel.appendLine(err?.message ?? err);
         return null;
       }
     },

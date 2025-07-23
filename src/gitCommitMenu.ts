@@ -1,12 +1,15 @@
 import { exec } from "child_process";
 import { promisify } from "util";
 import * as vscode from "vscode";
+import { outputChannel } from "./extension";
 import { getLLMProvider } from "./llmProvider";
 
 const execAsync = promisify(exec);
 
 export async function generateCommitMessage() {
   try {
+    outputChannel.appendLine("Generating commit message using LLM provider...");
+
     const gitExtension = vscode.extensions.getExtension("vscode.git")?.exports;
     const api = gitExtension?.getAPI(1);
 
@@ -15,11 +18,10 @@ export async function generateCommitMessage() {
       return;
     }
 
-    // Find a repository with any changes
     const repo = api.repositories.find((r: any) => {
       const indexChanges = r.state.indexChanges ?? [];
-      const workspaceChanges = r.state.workingTreeChanges ?? [];
-      return indexChanges.length > 0 || workspaceChanges.length > 0;
+      const workingTreeChanges = r.state.workingTreeChanges ?? [];
+      return indexChanges.length > 0 || workingTreeChanges.length > 0;
     });
 
     if (!repo) {
@@ -27,32 +29,50 @@ export async function generateCommitMessage() {
       return;
     }
 
-    // Collect all changed files (both staged and unstaged)
-    const changes = [
-      ...(repo.state.indexChanges ?? []),
-      ...(repo.state.workingTreeChanges ?? []),
-    ];
+    const indexChanges = repo.state.indexChanges ?? [];
+    const workingTreeChanges = repo.state.workingTreeChanges ?? [];
 
-    const validChanges = changes.filter((c: any) => !!(c.resourceUri ?? c.uri));
+    let filesToStage: string[] = [];
 
-    if (validChanges.length === 0) {
-      vscode.window.showInformationMessage("No file changes to commit.");
-      return;
+    if (indexChanges.length === 0 && workingTreeChanges.length > 0) {
+      outputChannel.appendLine(
+        "No files are staged. Staging working tree changes (excluding deleted files)..."
+      );
+
+      for (const change of workingTreeChanges) {
+        const uri = change.resourceUri ?? change.uri;
+        const filePath = uri.fsPath;
+
+        try {
+          await vscode.workspace.fs.stat(uri); // Check if file exists
+          filesToStage.push(filePath);
+        } catch {
+          outputChannel.appendLine(
+            `Skipping deleted or inaccessible file: ${filePath}`
+          );
+        }
+      }
+
+      if (filesToStage.length > 0) {
+        await repo.add(filesToStage);
+        outputChannel.appendLine(`Staged ${filesToStage.length} file(s).`);
+      } else {
+        vscode.window.showInformationMessage(
+          "No valid unstaged files to stage."
+        );
+        return;
+      }
+    } else {
+      outputChannel.appendLine(
+        "Files are already staged. Skipping working tree changes."
+      );
     }
 
-    // Stage all changed files
-    const filePaths = validChanges.map(
-      (c: any) => (c.resourceUri ?? c.uri).fsPath
-    );
-
-    await repo.add(filePaths);
-
-    // Get the diff of the staged changes
+    // Get the diff of staged changes
     const { stdout: diff } = await execAsync("git diff --cached --no-color", {
       cwd: repo.rootUri.fsPath,
     });
 
-    // Generate commit message using LLM
     const llm = await getLLMProvider();
     const commitMessage = await llm.generateCommitMessage(diff);
 
@@ -62,12 +82,9 @@ export async function generateCommitMessage() {
       vscode.window.showErrorMessage("Failed to generate commit message.");
     }
   } catch (err: any) {
-    console.error(err);
+    outputChannel.appendLine(err?.stack || String(err));
     vscode.window.showErrorMessage(
-      "An error occurred while generating commit message.",
-      {
-        detail: err?.message ?? "Unknown error",
-      }
+      "An error occurred while generating the commit message."
     );
   }
 }
