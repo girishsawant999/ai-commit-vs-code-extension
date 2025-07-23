@@ -5,6 +5,7 @@
   "icon": "icon.png",
   "version": "0.0.2",
   "publisher": "girishsawant",
+  "repository": "https://github.com/girishsawant999/ai-commit-vs-code-extension",
   "engines": {
     "vscode": "^1.70.0"
   },
