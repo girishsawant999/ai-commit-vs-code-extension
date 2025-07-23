@@ -2,7 +2,9 @@
   "name": "ai-commit-helper",
   "displayName": "AI Commit Helper",
   "description": "Generate AI commit messages using OpenAI or Gemini",
-  "version": "0.0.1",
+  "icon": "icon.png",
+  "version": "0.0.2",
+  "publisher": "girishsawant",
   "engines": {
     "vscode": "^1.70.0"
   },
@@ -53,7 +55,7 @@
   "scripts": {
     "watch": "tsc -watch -p ./",
     "compile": "tsc -p ./",
-    "prepublishOnly": "npm run compile"
+    "package": "rm -rf out && npm run compile && vsce package "
   },
   "devDependencies": {
     "@types/node": "^24.1.0",
