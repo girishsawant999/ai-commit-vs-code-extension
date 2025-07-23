@@ -69,7 +69,7 @@ export async function generateCommitMessage() {
     }
 
     // Get the diff of staged changes
-    const { stdout: diff } = await execAsync("git diff --cached --no-color", {
+    const { stdout: diff } = await execAsync("git diff --cached --unified=0", {
       cwd: repo.rootUri.fsPath,
     });
 
