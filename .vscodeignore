@@ -1,0 +1,9 @@
+**/*.ts        # exclude TypeScript sources
+src/**         # exclude source files if you compile to out/
+.vscode/**     # exclude workspace config
+test/**        # test files
+tsconfig.json
+tslint.json
+.gitignore
+node_modules/**/test/**
+
